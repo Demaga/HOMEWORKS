@@ -82,5 +82,5 @@ try:
 except IOError as e:
    print ("I/O error({0}): {1}".format(e.errno, e.strerror))
 
-except ValueError as ve:
+except ValueError as ve: 
     print("Value error {0} in line {1}".format(ve, line_number))
