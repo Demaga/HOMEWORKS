@@ -1,0 +1,86 @@
+'''
+dataset = {
+    region: {
+        year: {
+            date: {
+                volume: None,
+                price: None
+                }
+            }
+        }
+    }
+}
+'''
+
+
+from pprint import pprint
+import re
+
+
+def get_date(line):
+    line = re.split(',', line, maxsplit=2)
+    date = re.findall(r'\d{4}-\d{2}-\d{2}', line[1])[0]
+    return date, line[2]
+
+
+def get_price(line):
+    line = re.split(',', line, maxsplit=1)
+    price = re.findall(r'\d\.\d{1,2}', line[0])[0]
+    return price, line[1]
+
+
+def get_volume(line):
+    line = re.split(',', line, maxsplit=1)
+    volume = re.findall(r'\d{2,9}', line[0])[0]
+    return volume, line[1]
+
+
+def get_year_region(line):
+    year = re.findall(r'2015|2016|2017|2018', line)
+    year = year[0]
+    line = line.split(year)
+    region = line[1][1::]
+    return year, region
+
+
+def add_to_dataset(year, region, date, price, volume):
+    if region not in dataset:
+        dataset[region] = dict()
+    if year not in dataset[region]:
+        dataset[region][year] = dict()
+    if date not in dataset[region][year]:
+        dataset[region][year][date] = dict()
+    dataset[region][year][date]['price'] = price
+    dataset[region][year][date]['volume'] = volume
+
+
+dataset = {}
+
+try:
+   with open('avocado.csv', encoding="utf-8", mode='r') as file:
+       file.readline()
+
+       line_number = 1
+       for line in file:
+           line = line.strip().rstrip()
+           line_number += 1
+           if not line:
+               continue
+
+           date, line = get_date(line)
+           price, line = get_price(line)
+           volume,line = get_volume(line)
+           year, region = get_year_region(line)
+           print(date, price, volume, year, region)
+
+           add_to_dataset(year, region, date, price, volume)
+
+
+       pprint(dataset)
+
+
+except IOError as e:
+   print ("I/O error({0}): {1}".format(e.errno, e.strerror))
+
+except ValueError as ve:
+    print("Value error {0} in line {1}".format(ve, line_number))
